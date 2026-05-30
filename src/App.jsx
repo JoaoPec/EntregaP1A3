@@ -10,6 +10,7 @@ import Historico from './pages/Historico'
 import Relatorios from './pages/Relatorios'
 import CadastroCrianca from './pages/CadastroCrianca'
 import Planos from './pages/Planos'
+import Dashboard from './pages/Dashboard'
 
 function App() {
   return (
@@ -21,6 +22,9 @@ function App() {
         } />
         <Route path="/planos" element={
           <ProtectedRoute semOnboarding><Planos /></ProtectedRoute>
+        } />
+        <Route path="/dashboard" element={
+          <ProtectedRoute><Dashboard /></ProtectedRoute>
         } />
         <Route path="/" element={
           <ProtectedRoute><Home /></ProtectedRoute>

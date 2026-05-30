@@ -299,7 +299,16 @@ body {
   border-color: var(--cor-primaria);
 }
 
-.plano-preco {
+.indicador-texto {
+  font-size: 1.2rem;
+}
+
+.acoes-rapidas {
+  display: flex;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+
   font-size: 1.3rem;
   font-weight: bold;
   color: var(--cor-primaria);
