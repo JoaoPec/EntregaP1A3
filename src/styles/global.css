@@ -638,6 +638,12 @@ body {
   gap: 0.4rem;
 }
 
+.form-botoes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
 .tabela-ranking {
   width: 100%;
   border-collapse: collapse;

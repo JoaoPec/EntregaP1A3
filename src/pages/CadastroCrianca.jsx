@@ -1,17 +1,31 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { salvarCrianca } from '../services/dadosLocais'
+import { getCrianca, salvarCrianca } from '../services/dadosLocais'
 
-function CadastroCrianca() {
+function CadastroCrianca({ editar }) {
   const navigate = useNavigate()
   const [nome, setNome] = useState('')
   const [idade, setIdade] = useState('')
   const [transtorno, setTranstorno] = useState('')
   const [erro, setErro] = useState('')
+  const [msg, setMsg] = useState('')
+
+  // Preenche o formulário ao editar
+  useEffect(function () {
+    if (editar) {
+      const crianca = getCrianca()
+      if (crianca) {
+        setNome(crianca.nome)
+        setIdade(String(crianca.idade))
+        setTranstorno(crianca.transtorno)
+      }
+    }
+  }, [editar])
 
   function handleSubmit(e) {
     e.preventDefault()
     setErro('')
+    setMsg('')
 
     if (!nome || !idade || !transtorno) {
       setErro('Preencha todos os campos.')
@@ -24,15 +38,25 @@ function CadastroCrianca() {
     }
 
     salvarCrianca({ nome, idade: Number(idade), transtorno })
-    navigate('/planos')
+
+    if (editar) {
+      setMsg('Dados da criança atualizados!')
+      setTimeout(function () {
+        navigate('/dashboard')
+      }, 800)
+    } else {
+      navigate('/planos')
+    }
   }
 
   return (
     <div className="pagina">
       <div className="form-card">
-        <h1>Cadastro da criança</h1>
+        <h1>{editar ? 'Editar criança' : 'Cadastro da criança'}</h1>
         <p className="texto-ajuda">
-          Informe os dados da criança para personalizar a experiência nos jogos.
+          {editar
+            ? 'Atualize os dados da criança para ajustar a experiência nos jogos.'
+            : 'Informe os dados da criança para personalizar a experiência nos jogos.'}
         </p>
 
         <form onSubmit={handleSubmit}>
@@ -75,10 +99,23 @@ function CadastroCrianca() {
           </div>
 
           {erro && <p className="msg-erro" role="alert">{erro}</p>}
+          {msg && <p className="msg-sucesso" role="status">{msg}</p>}
 
           <button type="submit" className="btn btn-primario btn-largo">
-            Continuar
+            {editar ? 'Salvar alterações' : 'Continuar'}
           </button>
+
+          {editar && (
+            <div className="form-botoes">
+              <button
+                type="button"
+                className="btn btn-secundario btn-largo"
+                onClick={() => navigate('/dashboard')}
+              >
+                Cancelar
+              </button>
+            </div>
+          )}
         </form>
       </div>
     </div>

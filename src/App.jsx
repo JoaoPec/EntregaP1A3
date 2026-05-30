@@ -23,6 +23,9 @@ function App() {
         <Route path="/cadastro-crianca" element={
           <ProtectedRoute semOnboarding><CadastroCrianca /></ProtectedRoute>
         } />
+        <Route path="/editar-crianca" element={
+          <ProtectedRoute><CadastroCrianca editar /></ProtectedRoute>
+        } />
         <Route path="/planos" element={
           <ProtectedRoute semOnboarding><Planos /></ProtectedRoute>
         } />

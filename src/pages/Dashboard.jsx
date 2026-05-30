@@ -51,6 +51,7 @@ function Dashboard() {
         <h2>Ações rápidas</h2>
         <div className="acoes-rapidas">
           <Link to="/jogos" className="btn btn-primario">Ver jogos</Link>
+          <Link to="/editar-crianca" className="btn btn-secundario">Editar criança</Link>
           <Link to="/relatorios" className="btn btn-secundario">Ver relatórios</Link>
           <Link to="/planos" className="btn btn-secundario">Alterar plano</Link>
         </div>
