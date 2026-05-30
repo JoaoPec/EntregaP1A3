@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, Link } from 'react-router-dom'
 import {
   getJogo,
   getCategorias,
@@ -7,23 +7,11 @@ import {
   getMediaAvaliacoes,
   criarAvaliacao
 } from '../services/api'
+import { calcularAdaptacao } from '../services/dadosLocais'
 
-// Simula adaptação com regras simples (sem IA)
-function calcularAdaptacao(acertos, erros, tempo) {
-  const total = acertos + erros
-  if (total === 0) {
-    return { dificuldade: 'Média', tempo: 'Normal', estimulos: 'Padrão' }
-  }
-
-  const taxaAcerto = acertos / total
-
-  if (taxaAcerto >= 0.8 && tempo < 5) {
-    return { dificuldade: 'Alta', tempo: 'Reduzido', estimulos: 'Mínimos' }
-  }
-  if (taxaAcerto >= 0.6) {
-    return { dificuldade: 'Média', tempo: 'Normal', estimulos: 'Padrão' }
-  }
-  return { dificuldade: 'Baixa', tempo: 'Ampliado', estimulos: 'Reforçados' }
+// Simula adaptação com regras simples (sem IA) - preview na tela de detalhes
+function calcularAdaptacaoPreview(acertos, erros, tempo) {
+  return calcularAdaptacao(acertos, erros, tempo)
 }
 
 function DetalheJogo() {
@@ -42,7 +30,7 @@ function DetalheJogo() {
   const [erros, setErros] = useState(3)
   const [tempo, setTempo] = useState(4)
 
-  const adaptacao = calcularAdaptacao(acertos, erros, tempo)
+  const adaptacao = calcularAdaptacaoPreview(acertos, erros, tempo)
 
   useEffect(function () {
     async function carregar() {
@@ -115,6 +103,10 @@ function DetalheJogo() {
           <button type="button" className="btn btn-primario" onClick={handleCarrinho}>
             Adicionar ao carrinho
           </button>
+
+          <Link to={'/jogar/' + id} className="btn btn-secundario" style={{ marginTop: '0.5rem', display: 'inline-block' }}>
+            Jogar agora
+          </Link>
 
           {msg && <p className="msg-sucesso" role="status">{msg}</p>}
           {erro && <p className="msg-erro" role="alert">{erro}</p>}

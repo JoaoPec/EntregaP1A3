@@ -11,6 +11,7 @@ import Relatorios from './pages/Relatorios'
 import CadastroCrianca from './pages/CadastroCrianca'
 import Planos from './pages/Planos'
 import Dashboard from './pages/Dashboard'
+import Jogar from './pages/Jogar'
 
 function App() {
   return (
@@ -34,6 +35,9 @@ function App() {
         } />
         <Route path="/jogos/:id" element={
           <ProtectedRoute><DetalheJogo /></ProtectedRoute>
+        } />
+        <Route path="/jogar/:id" element={
+          <ProtectedRoute><Jogar /></ProtectedRoute>
         } />
         <Route path="/carrinho" element={
           <ProtectedRoute><Carrinho /></ProtectedRoute>
