@@ -309,20 +309,43 @@ body {
   flex-wrap: wrap;
 }
 
+.plano-preco {
   font-size: 1.3rem;
   font-weight: bold;
   color: var(--cor-primaria);
   margin: 0.5rem 0;
 }
 
-  background: var(--cor-card);
-  padding: 2rem;
-  border-radius: var(--raio);
-  box-shadow: var(--sombra);
+/* Mini-jogo */
+.jogo-area {
   max-width: 500px;
   margin: 0 auto;
 }
 
+.adaptacao-atual {
+  background: var(--cor-card);
+  padding: 1rem;
+  border-radius: var(--raio);
+  box-shadow: var(--sombra);
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.botoes-detalhe {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+.pergunta-jogo {
+  font-size: 1.5rem;
+  text-align: center;
+  margin-bottom: 1rem;
+  color: var(--cor-primaria);
+}
+
+.campo {
   margin-bottom: 1rem;
 }
 

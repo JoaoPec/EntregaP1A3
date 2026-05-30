@@ -100,13 +100,14 @@ function DetalheJogo() {
           <p>{jogo.descricao || 'Jogo educativo adaptativo para crianças neurodivergentes.'}</p>
           <p><strong>Ano:</strong> {jogo.ano}</p>
 
-          <button type="button" className="btn btn-primario" onClick={handleCarrinho}>
-            Adicionar ao carrinho
-          </button>
-
-          <Link to={'/jogar/' + id} className="btn btn-secundario" style={{ marginTop: '0.5rem', display: 'inline-block' }}>
-            Jogar agora
-          </Link>
+          <div className="botoes-detalhe">
+            <button type="button" className="btn btn-primario" onClick={handleCarrinho}>
+              Adicionar ao carrinho
+            </button>
+            <Link to={'/jogar/' + id} className="btn btn-secundario">
+              Jogar agora
+            </Link>
+          </div>
 
           {msg && <p className="msg-sucesso" role="status">{msg}</p>}
           {erro && <p className="msg-erro" role="alert">{erro}</p>}

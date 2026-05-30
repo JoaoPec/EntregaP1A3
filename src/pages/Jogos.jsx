@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { getJogos, getCategorias } from '../services/api'
+import { getPlano, PLANOS } from '../services/dadosLocais'
 import GameCard from '../components/GameCard'
 
 function Jogos() {
@@ -39,11 +40,17 @@ function Jogos() {
     return true
   })
 
+  // Limita jogos conforme o plano
+  const planoId = getPlano()
+  const limite = planoId ? PLANOS[planoId].limiteJogos : 4
+  const jogosDoPlano = jogosFiltrados.slice(0, limite)
+  const nomePlano = planoId ? PLANOS[planoId].nome : 'Básico'
+
   return (
     <div className="pagina">
       <h1>Jogos educativos</h1>
       <p className="texto-ajuda">
-        Escolha um jogo e veja como a adaptação funciona para cada perfil.
+        Plano {nomePlano}: até {limite} jogos disponíveis. Escolha um e clique em "Ver detalhes" para jogar.
       </p>
 
       <div className="filtros">
@@ -77,12 +84,12 @@ function Jogos() {
       {carregando && <p>Carregando jogos...</p>}
 
       <div className="grid-jogos">
-        {jogosFiltrados.map(function (jogo) {
+        {jogosDoPlano.map(function (jogo) {
           return <GameCard key={jogo.id} jogo={jogo} categorias={categorias} />
         })}
       </div>
 
-      {!carregando && jogosFiltrados.length === 0 && (
+      {!carregando && jogosDoPlano.length === 0 && (
         <p>Nenhum jogo encontrado com esse filtro.</p>
       )}
     </div>

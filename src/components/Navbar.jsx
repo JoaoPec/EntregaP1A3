@@ -20,6 +20,7 @@ function Navbar() {
         <nav aria-label="Menu principal">
           {logado && (
             <ul className="menu">
+              <li><Link to="/dashboard">Dashboard</Link></li>
               <li><Link to="/">Início</Link></li>
               <li><Link to="/jogos">Jogos</Link></li>
               <li><Link to="/carrinho">Carrinho</Link></li>

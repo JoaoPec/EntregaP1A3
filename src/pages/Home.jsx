@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getJogos, getCategorias } from '../services/api'
+import { getCrianca } from '../services/dadosLocais'
 import GameCard from '../components/GameCard'
 
 function Home() {
+  const crianca = getCrianca()
   const [jogos, setJogos] = useState([])
   const [categorias, setCategorias] = useState([])
   const [erro, setErro] = useState('')
@@ -25,12 +27,15 @@ function Home() {
   return (
     <div className="pagina">
       <section className="hero">
-        <h1>Bem-vindo ao Cognify</h1>
+        <h1>Bem-vindo ao Cognify{crianca ? ', ' + crianca.nome : ''}</h1>
         <p>
           Jogos educativos adaptativos para crianças com TDAH, TEA leve e dislexia.
           A dificuldade se ajusta conforme acertos, erros e tempo de resposta.
         </p>
-        <Link to="/jogos" className="btn btn-primario">Ver todos os jogos</Link>
+        <div className="acoes-rapidas" style={{ justifyContent: 'center' }}>
+          <Link to="/dashboard" className="btn btn-primario">Dashboard</Link>
+          <Link to="/jogos" className="btn btn-secundario">Ver jogos</Link>
+        </div>
       </section>
 
       <section className="secao">
