@@ -4,26 +4,16 @@ const JogoUsuarioDTO = require('../dtos/JogoUsuarioDTO');
 const JogoDTO = require('../dtos/JogoDTO');
 
 class JogoDAO {
-    async all(perfil, categoria) {
-        let query = "SELECT * FROM jogos WHERE 1=1";
-        const params = [];
+    async all(categoria) {
+        let query = "SELECT * FROM jogos";
 
-        if (perfil) {
-            query += " AND perfil_aprendizagem = ?";
-            params.push(perfil);
-        }
-
+        // Verificando se foi passado um parâmetro de busca
         if (categoria) {
-            query += " AND fk_categoria = (SELECT id FROM categorias WHERE nome = ?)";
-            params.push(categoria);
+            query += " WHERE categoria LIKE '%" + categoria + "%'";
         }
-
-        const rows = await dbService.all(query, params);
+        const rows = await dbService.all(query);
         if (rows == undefined) return [];
-        return rows.map(row => new Jogo(
-            row.id, row.nome, row.ano, row.preco, row.desconto,
-            row.descricao, row.fk_empresa, row.fk_categoria, row.perfil_aprendizagem
-        ));
+        return rows.map(row => new Jogo(row.id, row.nome, row.ano, row.preco, row.desconto, row.descricao, row.fk_empresa, row.fk_categoria));
     }
 
     async getExhibition() {
@@ -41,10 +31,7 @@ class JogoDAO {
         const query = "SELECT * FROM jogos WHERE id = ?";
         const row = await dbService.get(query, [id]);
         if (!row) return null;
-        return new Jogo(
-            row.id, row.nome, row.ano, row.preco, row.desconto,
-            row.descricao, row.fk_empresa, row.fk_categoria, row.perfil_aprendizagem
-        );
+        return new Jogo(row.id, row.nome, row.ano, row.preco, row.desconto, row.descricao, row.fk_empresa, row.fk_categoria);
     }
 
     async findByUser(id) {
@@ -55,23 +42,20 @@ class JogoDAO {
             WHERE c.fk_usuario = ?`;
         const rows = await dbService.all(query, [id]);
         if (rows == undefined) return [];
-        return rows.map(row => new JogoUsuarioDTO(row.chave_ativacao, new Jogo(
-            row.id, row.nome, row.ano, row.preco, row.desconto,
-            row.descricao, row.fk_empresa, row.fk_categoria, row.perfil_aprendizagem
-        )));
+        return rows.map(row => new JogoUsuarioDTO(row.chave_ativacao, new Jogo(row.id, row.nome, row.ano, row.preco, row.desconto, row.descricao, row.fk_empresa, row.fk_categoria)));
     }
 
     async create(jogo) {
-        const query = "INSERT INTO jogos (nome, descricao, ano, preco, desconto, fk_empresa, fk_categoria, perfil_aprendizagem) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        const params = [jogo.nome, jogo.descricao, jogo.ano, jogo.preco ?? 0, jogo.desconto, jogo.fkEmpresa, jogo.fkCategoria, jogo.perfilAprendizagem];
+        const query = "INSERT INTO jogos (nome, descricao, ano, preco, desconto, fk_empresa, fk_categoria) VALUES (?, ?, ?, ?, ?, ?, ?)";
+        const params = [jogo.nome, jogo.descricao, jogo.ano, jogo.preco, jogo.desconto, jogo.fkEmpresa, jogo.fkCategoria];
         const result = await dbService.run(query, params);
-        jogo.id = result.lastID;
+        jogo.id = result.lastID; // Atribuindo o ID gerado pelo banco de dados
         return jogo;
     }
 
     async update(jogo) {
-        const query = "UPDATE jogos set nome = ?, descricao = ?, ano = ?, preco = ?, desconto = ?, fk_empresa = ?, fk_categoria = ?, perfil_aprendizagem = ? where id = ?";
-        const params = [jogo.nome, jogo.descricao, jogo.ano, jogo.preco ?? 0, jogo.desconto, jogo.fkEmpresa, jogo.fkCategoria, jogo.perfilAprendizagem, jogo.id];
+        const query = "UPDATE jogos set nome = ?, descricao = ?, ano = ?, preco = ?, desconto = ?, fk_empresa = ?, fk_categoria = ? where id = ?";
+        const params = [jogo.nome, jogo.descricao, jogo.ano, jogo.preco, jogo.desconto, jogo.fkEmpresa, jogo.fkCategoria, jogo.id];
         const result = await dbService.run(query, params);
         return { changes: result.changes };
     }

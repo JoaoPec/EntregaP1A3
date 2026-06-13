@@ -4,7 +4,7 @@ const Jogo = require('../models/Jogo');
 class JogoController {
     async index(req, res) {
         try {
-            const jogos = await JogoDAO.all(req.query.perfil, req.query.categoria);
+            const jogos = await JogoDAO.all(req.query.categoria);
             if (jogos.length === 0) return res.status(204).json();
             res.json(jogos);
         } catch (error) {

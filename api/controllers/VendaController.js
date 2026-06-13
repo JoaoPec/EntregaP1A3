@@ -5,12 +5,10 @@ const jogoDAO = require('../daos/JogoDAO');
 const Venda = require("../models/Venda");
 const { generateActivationKey } = require('../util/cripto');
 const pagamentoService = require('../services/PagamentoService');
-const PlanoDAO = require('../daos/PlanoDAO');
 
 class VendaController {
     async checkout(req, res) {
         const usuarioId = req.user.id;
-        const { planoId, perfilAprendizagem } = req.body;
 
         try {
             const carrinho = await carrinhoDAO.findAtivoByUser(usuarioId);
@@ -23,14 +21,8 @@ class VendaController {
                 return res.status(200).json({ message: 'Carrinho vazio.' });
             }
 
-            // Cognify: cobra o plano mensal, não o preço individual dos jogos
-            let valorTotal = 0;
-            if (planoId && perfilAprendizagem) {
-                valorTotal = await PlanoDAO.getPreco(planoId, perfilAprendizagem);
-            } else {
-                const jogos = await Promise.all(itens.map(item => jogoDAO.findById(item.fkJogo)));
-                valorTotal = Number(jogos.reduce((total, jogo) => total + (jogo.preco || 0), 0).toFixed(2));
-            }
+            const jogos = await Promise.all(itens.map(item => jogoDAO.findById(item.fkJogo)));
+            const valorTotal = Number(jogos.reduce((total, jogo) => total + jogo.preco, 0).toFixed(2));
             
             const novaVenda = await vendaDAO.create(new Venda(null, valorTotal, itens.length, new Date(), usuarioId));
             // Gerar chaves de ativação e salvar itens do carrinho com as chaves

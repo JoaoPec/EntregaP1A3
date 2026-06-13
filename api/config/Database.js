@@ -63,28 +63,14 @@ class Database {
                 id INTEGER PRIMARY KEY AUTOINCREMENT, 
                 nome varchar(255) NOT NULL,
                 ano integer NOT NULL,
-                preco real NOT NULL DEFAULT 0,
+                preco real NOT NULL,
                 desconto real,
                 descricao TEXT,
-                perfil_aprendizagem TEXT,
                 fk_empresa integer NOT NULL,
                 fk_categoria integer NOT NULL,
                 FOREIGN KEY(fk_empresa) REFERENCES empresas(id),
                 FOREIGN KEY(fk_categoria) REFERENCES categorias(id),
                 UNIQUE(nome, fk_empresa))`);
-
-            // Planos Cognify (preço por perfil de aprendizagem)
-            this.db.run(`CREATE TABLE IF NOT EXISTS planos (
-                id TEXT PRIMARY KEY,
-                nome TEXT NOT NULL,
-                limite_jogos INTEGER NOT NULL)`);
-
-            this.db.run(`CREATE TABLE IF NOT EXISTS planos_precos (
-                fk_plano TEXT NOT NULL,
-                perfil_aprendizagem TEXT NOT NULL,
-                preco_mensal REAL NOT NULL,
-                PRIMARY KEY (fk_plano, perfil_aprendizagem),
-                FOREIGN KEY(fk_plano) REFERENCES planos(id))`);
 
             // Criação da tabela de vendas
             this.db.run(`CREATE TABLE IF NOT EXISTS vendas (
@@ -148,63 +134,61 @@ class Database {
             this.db.run(`INSERT OR IGNORE INTO usuarios (nome, email, senha, fk_perfil) VALUES ('Admin', 'admin@avjd.com', '${passAdmin}', (SELECT id FROM perfis WHERE nome = 'Administrador'))`);
             this.db.run(`INSERT OR IGNORE INTO usuarios (nome, email, senha, fk_perfil) VALUES ('Cliente', 'cliente@avjd.com', '${passCliente}', (SELECT id FROM perfis WHERE nome = 'Cliente'))`);
 
-            // Categorias Cognify
-            this.db.run(`INSERT OR IGNORE INTO categorias (nome) VALUES ('Educativo TDAH')`);
-            this.db.run(`INSERT OR IGNORE INTO categorias (nome) VALUES ('Educativo TEA')`);
-            this.db.run(`INSERT OR IGNORE INTO categorias (nome) VALUES ('Educativo Dislexia')`);
+            // Insere categorias
+            this.db.run(`INSERT OR IGNORE INTO categorias (nome) VALUES ('Ação')`);
+            this.db.run(`INSERT OR IGNORE INTO categorias (nome) VALUES ('Aventura')`);
+            this.db.run(`INSERT OR IGNORE INTO categorias (nome) VALUES ('RPG')`);
+            this.db.run(`INSERT OR IGNORE INTO categorias (nome) VALUES ('Estratégia')`);
+            this.db.run(`INSERT OR IGNORE INTO categorias (nome) VALUES ('Simulação')`);
+            this.db.run(`INSERT OR IGNORE INTO categorias (nome) VALUES ('Esportes')`);
+            this.db.run(`INSERT OR IGNORE INTO categorias (nome) VALUES ('Corrida')`);
+            this.db.run(`INSERT OR IGNORE INTO categorias (nome) VALUES ('Puzzle')`);
+            this.db.run(`INSERT OR IGNORE INTO categorias (nome) VALUES ('Luta')`);
+            this.db.run(`INSERT OR IGNORE INTO categorias (nome) VALUES ('Tiro')`);
+            this.db.run(`INSERT OR IGNORE INTO categorias (nome) VALUES ('Plataforma')`);
+            this.db.run(`INSERT OR IGNORE INTO categorias (nome) VALUES ('Horror')`);
+            this.db.run(`INSERT OR IGNORE INTO categorias (nome) VALUES ('Indie')`);
 
-            this.db.run(`INSERT OR IGNORE INTO empresas (nome) VALUES ('Cognify Labs')`);
-
-            this._seedPlanos();
-            this._seedJogosCognify();
+            // Insere empresas
+            this.db.run(`INSERT OR IGNORE INTO empresas (nome) VALUES ('Nintendo')`);
+            this.db.run(`INSERT OR IGNORE INTO empresas (nome) VALUES ('Sony')`);
+            this.db.run(`INSERT OR IGNORE INTO empresas (nome) VALUES ('Microsoft')`);
+            this.db.run(`INSERT OR IGNORE INTO empresas (nome) VALUES ('Valve')`);
+            this.db.run(`INSERT OR IGNORE INTO empresas (nome) VALUES ('Electronic Arts')`);
+            this.db.run(`INSERT OR IGNORE INTO empresas (nome) VALUES ('Activision')`);
+            this.db.run(`INSERT OR IGNORE INTO empresas (nome) VALUES ('Ubisoft')`);
+            this.db.run(`INSERT OR IGNORE INTO empresas (nome) VALUES ('Rockstar Games')`);
+            this.db.run(`INSERT OR IGNORE INTO empresas (nome) VALUES ('Bandai Namco')`);
+            this.db.run(`INSERT OR IGNORE INTO empresas (nome) VALUES ('Sega')`);
+            this.db.run(`INSERT OR IGNORE INTO empresas (nome) VALUES ('Capcom')`);
+            this.db.run(`INSERT OR IGNORE INTO empresas (nome) VALUES ('Square Enix')`);
+            this.db.run(`INSERT OR IGNORE INTO empresas (nome) VALUES ('Epic Games')`);
+            this.db.run(`INSERT OR IGNORE INTO empresas (nome) VALUES ('CD Projekt Red')`);
+            this.db.run(`INSERT OR IGNORE INTO empresas (nome) VALUES ('Riot Games')`);
+            this.db.run(`INSERT OR IGNORE INTO empresas (nome) VALUES ('Blizzard Entertainment')`);
+            this.db.run(`INSERT OR IGNORE INTO empresas (nome) VALUES ('Dumativa')`);
+        
+            this._seedJogosFromCSV();
         });
     }
 
-    _seedPlanos() {
-        const planos = [
-            ['basico', 'Básico', 4],
-            ['intermediario', 'Intermediário', 8],
-            ['premium', 'Premium', 12]
-        ];
-        planos.forEach(([id, nome, limite]) => {
-            this.db.run(
-                `INSERT OR IGNORE INTO planos (id, nome, limite_jogos) VALUES (?, ?, ?)`,
-                [id, nome, limite]
-            );
-        });
-
-        const precos = [
-            ['basico', 'tdah', 0], ['basico', 'tea', 0], ['basico', 'dislexia', 0],
-            ['intermediario', 'tdah', 29], ['intermediario', 'tea', 29], ['intermediario', 'dislexia', 27],
-            ['premium', 'tdah', 49], ['premium', 'tea', 49], ['premium', 'dislexia', 45]
-        ];
-        precos.forEach(([plano, perfil, preco]) => {
-            this.db.run(
-                `INSERT OR IGNORE INTO planos_precos (fk_plano, perfil_aprendizagem, preco_mensal) VALUES (?, ?, ?)`,
-                [plano, perfil, preco]
-            );
-        });
-    }
-
-    _seedJogosCognify() {
-        const csvFilePath = path.join(__dirname, 'jogos-cognify.csv');
+    _seedJogosFromCSV() {
+        const csvFilePath = path.join(__dirname, 'jogos.csv');
         fs.readFile(csvFilePath, 'utf8', (err, data) => {
             if (err) {
-                console.error('Erro ao ler jogos Cognify:', err);
+                console.error('Erro ao ler o arquivo CSV:', err);
                 return;
             }
 
-            const lines = data.split('\n').filter(line => line.trim());
+            const lines = data.split('\n').slice(0);
             lines.forEach(line => {
-                const [nome, ano, descricao, perfil, empresa, categoria] = line.split(',');
+                const [nome, ano, preco, descricao, empresa, categoria] = line.split(',');
                 if (nome) {
                     this.db.run(`INSERT OR IGNORE INTO empresas (nome) VALUES (?)`, [empresa]);
                     this.db.run(`INSERT OR IGNORE INTO categorias (nome) VALUES (?)`, [categoria]);
-                    this.db.run(
-                        `INSERT OR IGNORE INTO jogos (nome, ano, preco, descricao, perfil_aprendizagem, fk_empresa, fk_categoria) VALUES 
-                        (?, ?, 0, ?, ?, (SELECT id FROM empresas WHERE nome = ?), (SELECT id FROM categorias WHERE nome = ?))`,
-                        [nome, parseInt(ano), descricao, perfil, empresa, categoria]
-                    );
+                    this.db.run(`INSERT OR IGNORE INTO jogos (nome, ano, preco, descricao, fk_empresa, fk_categoria) VALUES 
+                        (?, ?, ?, ?, (SELECT id FROM empresas WHERE nome = ?), (SELECT id FROM categorias WHERE nome = ?))`, 
+                        [nome, parseInt(ano), parseFloat(preco), descricao, empresa, categoria]);
                 }
             });
         });

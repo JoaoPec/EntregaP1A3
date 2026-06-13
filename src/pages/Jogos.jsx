@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react'
 import { getJogos, getCategorias } from '../services/api'
-import { getPlano, getCrianca, NOMES_PERFIL, PLANOS } from '../services/dadosLocais'
 import GameCard from '../components/GameCard'
 
 function Jogos() {
-  const crianca = getCrianca()
   const [jogos, setJogos] = useState([])
   const [categorias, setCategorias] = useState([])
   const [categoriaFiltro, setCategoriaFiltro] = useState('')
@@ -12,14 +10,12 @@ function Jogos() {
   const [erro, setErro] = useState('')
   const [carregando, setCarregando] = useState(true)
 
-  const perfil = crianca ? crianca.transtorno : ''
-
   useEffect(function () {
     async function carregar() {
       setCarregando(true)
       setErro('')
       try {
-        const listaJogos = await getJogos(perfil, categoriaFiltro || null)
+        const listaJogos = await getJogos()
         const listaCategorias = await getCategorias()
         setJogos(listaJogos || [])
         setCategorias(listaCategorias || [])
@@ -29,29 +25,23 @@ function Jogos() {
       setCarregando(false)
     }
     carregar()
-  }, [perfil, categoriaFiltro])
+  }, [])
 
   const jogosFiltrados = jogos.filter(function (jogo) {
     if (busca && !jogo.nome.toLowerCase().includes(busca.toLowerCase())) {
       return false
     }
+    if (categoriaFiltro) {
+      const cat = categorias.find(c => c.id === jogo.fk_categoria)
+      if (!cat || cat.nome !== categoriaFiltro) return false
+    }
     return true
   })
 
-  const planoId = getPlano()
-  const limite = planoId ? PLANOS[planoId].limiteJogos : 4
-  const jogosDoPlano = jogosFiltrados.slice(0, limite)
-  const nomePlano = planoId ? PLANOS[planoId].nome : 'Básico'
-
   return (
     <div className="pagina">
-      <h1>Jogos educativos</h1>
-      {crianca && (
-        <p className="texto-ajuda">
-          Jogos para <strong>{crianca.nome}</strong> — perfil <strong>{NOMES_PERFIL[perfil]}</strong>.
-          Plano {nomePlano}: até {limite} jogos. Sem preço individual — inclusos na assinatura.
-        </p>
-      )}
+      <h1>Jogos</h1>
+      <p className="texto-ajuda">Lista de jogos disponíveis na loja.</p>
 
       <div className="filtros">
         <div className="campo">
@@ -84,13 +74,13 @@ function Jogos() {
       {carregando && <p>Carregando jogos...</p>}
 
       <div className="grid-jogos">
-        {jogosDoPlano.map(function (jogo) {
+        {jogosFiltrados.map(function (jogo) {
           return <GameCard key={jogo.id} jogo={jogo} categorias={categorias} />
         })}
       </div>
 
-      {!carregando && jogosDoPlano.length === 0 && (
-        <p>Nenhum jogo encontrado para este perfil.</p>
+      {!carregando && jogosFiltrados.length === 0 && (
+        <p>Nenhum jogo encontrado.</p>
       )}
     </div>
   )

@@ -14,7 +14,6 @@ router.use('/carrinho', require('./carrinho'));
 router.use('/vendas', require('./venda'));
 router.use('/avaliacoes', require('./avaliacao'));
 router.use('/lista-desejo', require('./listaDesejo'));
-router.use('/planos', require('./plano'));
 router.use('/relatorios', require('./relatorio'));
 
 // Rota pública
