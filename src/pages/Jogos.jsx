@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { getJogos, getCategorias } from '../services/api'
 import GameCard from '../components/GameCard'
 
 function Jogos() {
+  const navigate = useNavigate()
   const [jogos, setJogos] = useState([])
   const [categorias, setCategorias] = useState([])
   const [categoriaFiltro, setCategoriaFiltro] = useState('')
@@ -20,6 +22,10 @@ function Jogos() {
         setJogos(listaJogos || [])
         setCategorias(listaCategorias || [])
       } catch (err) {
+        if (err.message === 'Token inválido.' || err.message.includes('Acesso negado')) {
+          navigate('/login', { replace: true })
+          return
+        }
         setErro(err.message)
       }
       setCarregando(false)
@@ -79,7 +85,7 @@ function Jogos() {
         })}
       </div>
 
-      {!carregando && jogosFiltrados.length === 0 && (
+      {!carregando && !erro && jogosFiltrados.length === 0 && (
         <p>Nenhum jogo encontrado.</p>
       )}
     </div>
