@@ -134,39 +134,12 @@ class Database {
             this.db.run(`INSERT OR IGNORE INTO usuarios (nome, email, senha, fk_perfil) VALUES ('Admin', 'admin@avjd.com', '${passAdmin}', (SELECT id FROM perfis WHERE nome = 'Administrador'))`);
             this.db.run(`INSERT OR IGNORE INTO usuarios (nome, email, senha, fk_perfil) VALUES ('Cliente', 'cliente@avjd.com', '${passCliente}', (SELECT id FROM perfis WHERE nome = 'Cliente'))`);
 
-            // Insere categorias
-            this.db.run(`INSERT OR IGNORE INTO categorias (nome) VALUES ('Ação')`);
-            this.db.run(`INSERT OR IGNORE INTO categorias (nome) VALUES ('Aventura')`);
-            this.db.run(`INSERT OR IGNORE INTO categorias (nome) VALUES ('RPG')`);
-            this.db.run(`INSERT OR IGNORE INTO categorias (nome) VALUES ('Estratégia')`);
-            this.db.run(`INSERT OR IGNORE INTO categorias (nome) VALUES ('Simulação')`);
-            this.db.run(`INSERT OR IGNORE INTO categorias (nome) VALUES ('Esportes')`);
-            this.db.run(`INSERT OR IGNORE INTO categorias (nome) VALUES ('Corrida')`);
-            this.db.run(`INSERT OR IGNORE INTO categorias (nome) VALUES ('Puzzle')`);
-            this.db.run(`INSERT OR IGNORE INTO categorias (nome) VALUES ('Luta')`);
-            this.db.run(`INSERT OR IGNORE INTO categorias (nome) VALUES ('Tiro')`);
-            this.db.run(`INSERT OR IGNORE INTO categorias (nome) VALUES ('Plataforma')`);
-            this.db.run(`INSERT OR IGNORE INTO categorias (nome) VALUES ('Horror')`);
-            this.db.run(`INSERT OR IGNORE INTO categorias (nome) VALUES ('Indie')`);
+            // Categorias e empresa dos jogos educativos
+            this.db.run(`INSERT OR IGNORE INTO categorias (nome) VALUES ('Educativo TDAH')`);
+            this.db.run(`INSERT OR IGNORE INTO categorias (nome) VALUES ('Educativo TEA')`);
+            this.db.run(`INSERT OR IGNORE INTO categorias (nome) VALUES ('Educativo Dislexia')`);
 
-            // Insere empresas
-            this.db.run(`INSERT OR IGNORE INTO empresas (nome) VALUES ('Nintendo')`);
-            this.db.run(`INSERT OR IGNORE INTO empresas (nome) VALUES ('Sony')`);
-            this.db.run(`INSERT OR IGNORE INTO empresas (nome) VALUES ('Microsoft')`);
-            this.db.run(`INSERT OR IGNORE INTO empresas (nome) VALUES ('Valve')`);
-            this.db.run(`INSERT OR IGNORE INTO empresas (nome) VALUES ('Electronic Arts')`);
-            this.db.run(`INSERT OR IGNORE INTO empresas (nome) VALUES ('Activision')`);
-            this.db.run(`INSERT OR IGNORE INTO empresas (nome) VALUES ('Ubisoft')`);
-            this.db.run(`INSERT OR IGNORE INTO empresas (nome) VALUES ('Rockstar Games')`);
-            this.db.run(`INSERT OR IGNORE INTO empresas (nome) VALUES ('Bandai Namco')`);
-            this.db.run(`INSERT OR IGNORE INTO empresas (nome) VALUES ('Sega')`);
-            this.db.run(`INSERT OR IGNORE INTO empresas (nome) VALUES ('Capcom')`);
-            this.db.run(`INSERT OR IGNORE INTO empresas (nome) VALUES ('Square Enix')`);
-            this.db.run(`INSERT OR IGNORE INTO empresas (nome) VALUES ('Epic Games')`);
-            this.db.run(`INSERT OR IGNORE INTO empresas (nome) VALUES ('CD Projekt Red')`);
-            this.db.run(`INSERT OR IGNORE INTO empresas (nome) VALUES ('Riot Games')`);
-            this.db.run(`INSERT OR IGNORE INTO empresas (nome) VALUES ('Blizzard Entertainment')`);
-            this.db.run(`INSERT OR IGNORE INTO empresas (nome) VALUES ('Dumativa')`);
+            this.db.run(`INSERT OR IGNORE INTO empresas (nome) VALUES ('Cognify Labs')`);
         
             this._seedJogosFromCSV();
         });
@@ -180,16 +153,23 @@ class Database {
                 return;
             }
 
-            const lines = data.split('\n').slice(0);
-            lines.forEach(line => {
-                const [nome, ano, preco, descricao, empresa, categoria] = line.split(',');
-                if (nome) {
-                    this.db.run(`INSERT OR IGNORE INTO empresas (nome) VALUES (?)`, [empresa]);
-                    this.db.run(`INSERT OR IGNORE INTO categorias (nome) VALUES (?)`, [categoria]);
-                    this.db.run(`INSERT OR IGNORE INTO jogos (nome, ano, preco, descricao, fk_empresa, fk_categoria) VALUES 
-                        (?, ?, ?, ?, (SELECT id FROM empresas WHERE nome = ?), (SELECT id FROM categorias WHERE nome = ?))`, 
-                        [nome, parseInt(ano), parseFloat(preco), descricao, empresa, categoria]);
-                }
+            this.db.serialize(() => {
+                this.db.run('DELETE FROM itens_carrinho');
+                this.db.run('DELETE FROM avaliacoes');
+                this.db.run('DELETE FROM lista_desejos');
+                this.db.run('DELETE FROM jogos');
+
+                const lines = data.split('\n').filter(line => line.trim());
+                lines.forEach(line => {
+                    const [nome, ano, preco, descricao, empresa, categoria] = line.split(',');
+                    if (nome) {
+                        this.db.run(`INSERT OR IGNORE INTO empresas (nome) VALUES (?)`, [empresa]);
+                        this.db.run(`INSERT OR IGNORE INTO categorias (nome) VALUES (?)`, [categoria]);
+                        this.db.run(`INSERT OR IGNORE INTO jogos (nome, ano, preco, descricao, fk_empresa, fk_categoria) VALUES 
+                            (?, ?, ?, ?, (SELECT id FROM empresas WHERE nome = ?), (SELECT id FROM categorias WHERE nome = ?))`, 
+                            [nome, parseInt(ano), parseFloat(preco), descricao, empresa, categoria]);
+                    }
+                });
             });
         });
     }
