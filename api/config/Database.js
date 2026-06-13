@@ -134,13 +134,7 @@ class Database {
             this.db.run(`INSERT OR IGNORE INTO usuarios (nome, email, senha, fk_perfil) VALUES ('Admin', 'admin@avjd.com', '${passAdmin}', (SELECT id FROM perfis WHERE nome = 'Administrador'))`);
             this.db.run(`INSERT OR IGNORE INTO usuarios (nome, email, senha, fk_perfil) VALUES ('Cliente', 'cliente@avjd.com', '${passCliente}', (SELECT id FROM perfis WHERE nome = 'Cliente'))`);
 
-            // Categorias e empresa dos jogos educativos
-            this.db.run(`INSERT OR IGNORE INTO categorias (nome) VALUES ('Educativo TDAH')`);
-            this.db.run(`INSERT OR IGNORE INTO categorias (nome) VALUES ('Educativo TEA')`);
-            this.db.run(`INSERT OR IGNORE INTO categorias (nome) VALUES ('Educativo Dislexia')`);
-
-            this.db.run(`INSERT OR IGNORE INTO empresas (nome) VALUES ('Cognify Labs')`);
-        
+            // Categorias e empresa inseridas via jogos.csv no seed
             this._seedJogosFromCSV();
         });
     }
@@ -158,6 +152,8 @@ class Database {
                 this.db.run('DELETE FROM avaliacoes');
                 this.db.run('DELETE FROM lista_desejos');
                 this.db.run('DELETE FROM jogos');
+                this.db.run('DELETE FROM categorias');
+                this.db.run('DELETE FROM empresas');
 
                 const lines = data.split('\n').filter(line => line.trim());
                 lines.forEach(line => {

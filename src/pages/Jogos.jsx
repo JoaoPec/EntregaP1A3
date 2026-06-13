@@ -38,7 +38,8 @@ function Jogos() {
       return false
     }
     if (categoriaFiltro) {
-      const cat = categorias.find(c => c.id === jogo.fk_categoria)
+      const catId = jogo.fkCategoria || jogo.fk_categoria
+      const cat = categorias.find(c => c.id === catId)
       if (!cat || cat.nome !== categoriaFiltro) return false
     }
     return true

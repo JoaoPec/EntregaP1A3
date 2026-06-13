@@ -1,7 +1,10 @@
+import { Link } from 'react-router-dom'
+
 function GameCard({ jogo, categorias }) {
   let nomeCategoria = ''
-  if (categorias && jogo.fk_categoria) {
-    const cat = categorias.find(c => c.id === jogo.fk_categoria)
+  const catId = jogo.fkCategoria || jogo.fk_categoria
+  if (categorias && catId) {
+    const cat = categorias.find(c => c.id === catId)
     nomeCategoria = cat ? cat.nome : ''
   }
 
@@ -16,6 +19,11 @@ function GameCard({ jogo, categorias }) {
       {nomeCategoria && <span className="tag">{nomeCategoria}</span>}
       <p className="preco">R$ {precoFinal}</p>
       {jogo.descricao && <p className="texto-pequeno">{jogo.descricao}</p>}
+      {jogo.id && (
+        <Link to={'/jogos/' + jogo.id} className="btn btn-primario btn-pequeno">
+          Ver detalhes
+        </Link>
+      )}
     </article>
   )
 }
