@@ -8,8 +8,11 @@ import {
   criarAvaliacao
 } from '../services/api'
 
+import { isAdmin } from '../services/auth'
+
 function DetalheJogo() {
   const { id } = useParams()
+  const admin = isAdmin()
   const [jogo, setJogo] = useState(null)
   const [categoria, setCategoria] = useState('')
   const [media, setMedia] = useState(null)
@@ -88,9 +91,11 @@ function DetalheJogo() {
           <p>{jogo.descricao}</p>
           <p><strong>Ano:</strong> {jogo.ano}</p>
 
-          <button type="button" className="btn btn-primario" onClick={handleCarrinho}>
-            Adicionar ao carrinho
-          </button>
+          {!admin && (
+            <button type="button" className="btn btn-primario" onClick={handleCarrinho}>
+              Adicionar ao carrinho
+            </button>
+          )}
 
           {msg && <p className="msg-sucesso" role="status">{msg}</p>}
           {erro && <p className="msg-erro" role="alert">{erro}</p>}

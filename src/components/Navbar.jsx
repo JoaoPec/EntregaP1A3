@@ -37,9 +37,9 @@ function Navbar() {
               {admin && <li><Link to="/admin">Admin</Link></li>}
               <li><Link to="/">Início</Link></li>
               <li><Link to="/jogos">Jogos</Link></li>
-              <li><Link to="/carrinho">Carrinho</Link></li>
-              <li><Link to="/historico">Histórico</Link></li>
-              <li><Link to="/relatorios">Relatórios</Link></li>
+              {!admin && <li><Link to="/carrinho">Carrinho</Link></li>}
+              {!admin && <li><Link to="/historico">Histórico</Link></li>}
+              {admin && <li><Link to="/relatorios">Relatórios</Link></li>}
             </ul>
           )}
         </nav>
@@ -53,10 +53,8 @@ function Navbar() {
           >
             {modoEscuro ? 'Modo claro' : 'Modo escuro'}
           </button>
-          {logado ? (
+          {logado && (
             <button type="button" className="btn btn-secundario btn-pequeno" onClick={sair}>Sair</button>
-          ) : (
-            <Link to="/login" className="btn btn-primario btn-pequeno">Entrar</Link>
           )}
         </div>
       </div>
