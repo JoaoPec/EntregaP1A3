@@ -51,6 +51,18 @@ function Historico() {
                   <span>{formatarData(venda.data)}</span>
                 </div>
                 <p>Itens: {venda.quantidade}</p>
+                {venda.itens && venda.itens.length > 0 && (
+                  <ul className="historico-itens">
+                    {venda.itens.map(function (item, index) {
+                      return (
+                        <li key={index}>
+                          <span>{item.nome}</span>
+                          {item.chave_ativacao && <small>Chave: {item.chave_ativacao}</small>}
+                        </li>
+                      )
+                    })}
+                  </ul>
+                )}
                 <p className="historico-valor">
                   Total: R$ {Number(venda.valor_total).toFixed(2)}
                 </p>

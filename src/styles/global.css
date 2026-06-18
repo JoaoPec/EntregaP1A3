@@ -582,6 +582,28 @@ body {
   color: var(--cor-primaria);
 }
 
+.historico-itens {
+  list-style: none;
+  margin: 0.6rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.historico-itens li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.45rem 0.6rem;
+  background: var(--cor-fundo);
+  border-radius: var(--raio);
+}
+
+.historico-itens small {
+  color: var(--cor-texto-claro);
+  white-space: nowrap;
+}
+
 /* Relatórios */
 .cards-indicadores {
   display: grid;
