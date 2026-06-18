@@ -2,7 +2,7 @@
   "$schema": "https://railway.com/railway.schema.json",
   "build": {
     "builder": "NIXPACKS",
-    "buildCommand": "npm install --prefix api && npm run build"
+    "buildCommand": "npm install --prefix api"
   },
   "deploy": {
     "startCommand": "node api/index.js",
