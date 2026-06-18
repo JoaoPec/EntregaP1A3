@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts'
 import { getJogosMaisVendidos, getHistorico, getCategorias, getJogos, getEmpresas } from '../services/api'
 
-const CORES = ['#7c9cbf', '#a8c5a0', '#d4a5a5', '#c9b8d9', '#f0c987']
+const CORES = ['#6b8499', '#849a7a', '#a08888', '#9188a0', '#a89470']
 
 function Relatorios() {
   const [topJogos, setTopJogos] = useState([])
@@ -113,7 +113,7 @@ function Relatorios() {
               <XAxis dataKey="nome" />
               <YAxis />
               <Tooltip />
-              <Bar dataKey="vendas" fill="#7c9cbf" name="Vendas" />
+              <Bar dataKey="vendas" fill="#6b8499" name="Vendas" />
             </BarChart>
           </ResponsiveContainer>
         ) : (
@@ -138,7 +138,7 @@ function Relatorios() {
               <XAxis dataKey="nome" />
               <YAxis />
               <Tooltip />
-              <Bar dataKey="vendas" fill="#a8c5a0" name="Vendas" />
+              <Bar dataKey="vendas" fill="#849a7a" name="Vendas" />
             </BarChart>
           </ResponsiveContainer>
         ) : (
