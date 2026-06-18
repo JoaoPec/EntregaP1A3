@@ -27,8 +27,22 @@ app.use('/api/v1', v1Routes);
 
 const frontendPath = path.resolve(__dirname, '..', 'dist');
 if (fs.existsSync(frontendPath)) {
-  app.use(express.static(frontendPath));
+  app.use(express.static(frontendPath, {
+    immutable: true,
+    maxAge: '1y',
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith('index.html')) {
+        res.setHeader('Cache-Control', 'no-store');
+      }
+    }
+  }));
+
   app.get(/.*/, (req, res) => {
+    if (path.extname(req.path)) {
+      return res.status(404).send('Arquivo nao encontrado.');
+    }
+
+    res.setHeader('Cache-Control', 'no-store');
     res.sendFile(path.join(frontendPath, 'index.html'));
   });
 }
