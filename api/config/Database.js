@@ -1,9 +1,8 @@
 const sqlite = require('sqlite3').verbose();
 const fs = require('fs');
 const path = require('path');
-const { hashPassword } = require('../util/cripto');
 
-require("dotenv").config();
+require('dotenv').config();
 
 class Database {
     constructor() {
@@ -19,26 +18,22 @@ class Database {
             if (err) {
                 console.error('Erro ao conectar ao banco de dados:', err.message);
             } else {
-                console.log('Conexão com o banco de dados estabelecida com sucesso.');
+                console.log('Conexao com o banco de dados estabelecida com sucesso.');
                 this._createTable();
                 this._seed();
             }
         });
-        
     }
 
     _createTable() {
         this.db.serialize(() => {
-            // Habilita o suporte a chaves estrangeiras
-            this.db.get("PRAGMA foreign_keys = ON");
+            this.db.get('PRAGMA foreign_keys = ON');
 
-            // Tabela de Perfis (Admin, Cliente)
             this.db.run(`CREATE TABLE IF NOT EXISTS perfis (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 nome TEXT NOT NULL UNIQUE
             )`);
 
-            // Criação da tabela de usuários
             this.db.run(`CREATE TABLE IF NOT EXISTS usuarios (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 nome varchar(255) NOT NULL,
@@ -48,19 +43,16 @@ class Database {
                 fk_perfil INTEGER NOT NULL,
                 FOREIGN KEY(fk_perfil) REFERENCES perfis(id))`);
 
-            // Criação da tabela de categoria de jogos
             this.db.run(`CREATE TABLE IF NOT EXISTS categorias (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 nome varchar(255) NOT NULL UNIQUE)`);
 
-            // Criação da tabela de empresas
             this.db.run(`CREATE TABLE IF NOT EXISTS empresas (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 nome varchar(255) NOT NULL UNIQUE)`);
 
-            // Criação da tabela de jogos
             this.db.run(`CREATE TABLE IF NOT EXISTS jogos (
-                id INTEGER PRIMARY KEY AUTOINCREMENT, 
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
                 nome varchar(255) NOT NULL,
                 ano integer NOT NULL,
                 preco real NOT NULL,
@@ -72,7 +64,6 @@ class Database {
                 FOREIGN KEY(fk_categoria) REFERENCES categorias(id),
                 UNIQUE(nome, fk_empresa))`);
 
-            // Criação da tabela de vendas
             this.db.run(`CREATE TABLE IF NOT EXISTS vendas (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 fk_usuario INTEGER NOT NULL,
@@ -81,25 +72,22 @@ class Database {
                 data datetime DEFAULT(datetime('now')),
                 FOREIGN KEY(fk_usuario) REFERENCES usuarios(id))`);
 
-            // Criação da tabela de carrinhos
             this.db.run(`CREATE TABLE IF NOT EXISTS carrinhos (
-                id INTEGER PRIMARY KEY AUTOINCREMENT, 
-                fk_usuario INTEGER NOT NULL, 
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                fk_usuario INTEGER NOT NULL,
                 fk_venda INTEGER,
                 status TEXT NOT NULL DEFAULT 'A',
-                FOREIGN KEY(fk_usuario) REFERENCES usuarios(id), 
+                FOREIGN KEY(fk_usuario) REFERENCES usuarios(id),
                 FOREIGN KEY(fk_venda) REFERENCES vendas(id))`);
 
-            // Criação da tabela de itens do carrinho
             this.db.run(`CREATE TABLE IF NOT EXISTS itens_carrinho (
-                id INTEGER PRIMARY KEY AUTOINCREMENT, 
-                fk_jogo INTEGER NOT NULL, 
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                fk_jogo INTEGER NOT NULL,
                 fk_carrinho INTEGER NOT NULL,
                 chave_ativacao TEXT,
-                FOREIGN KEY(fk_jogo) REFERENCES jogos(id), 
+                FOREIGN KEY(fk_jogo) REFERENCES jogos(id),
                 FOREIGN KEY(fk_carrinho) REFERENCES carrinhos(id))`);
 
-            // Criação da tabela de avaliações
             this.db.run(`CREATE TABLE IF NOT EXISTS avaliacoes (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 fk_usuario INTEGER NOT NULL,
@@ -111,7 +99,6 @@ class Database {
                 FOREIGN KEY(fk_jogo) REFERENCES jogos(id),
                 UNIQUE(fk_usuario, fk_jogo))`);
 
-            // Criação da tabela de lista de desejos
             this.db.run(`CREATE TABLE IF NOT EXISTS lista_desejos (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 fk_usuario INTEGER NOT NULL,
@@ -122,54 +109,54 @@ class Database {
         });
     }
 
-    async _seed(){
-        this.db.serialize(async () => {
-            // Insere perfis
+    _seed() {
+        this.db.serialize(() => {
             this.db.run(`INSERT OR IGNORE INTO perfis (nome) VALUES ('Administrador')`);
             this.db.run(`INSERT OR IGNORE INTO perfis (nome) VALUES ('Cliente')`);
 
-            // Insere um usuários
-            const passAdmin = await hashPassword('admin123');
-            const passCliente = await hashPassword('cliente123');
+            const passAdmin = '$2b$10$zO.7NJgch3ywRR4z6VqLl.ymzfWiC7UWnNgflazzhI4s9WIfaIAnm';
+            const passCliente = '$2b$10$zOmYNPw01MgsoQ5kAay0zedEnncs8BMzV/uwJaO.q88ld..d994ZK';
             this.db.run(`INSERT OR IGNORE INTO usuarios (nome, email, senha, fk_perfil) VALUES ('Admin', 'admin@avjd.com', '${passAdmin}', (SELECT id FROM perfis WHERE nome = 'Administrador'))`);
             this.db.run(`INSERT OR IGNORE INTO usuarios (nome, email, senha, fk_perfil) VALUES ('Cliente', 'cliente@avjd.com', '${passCliente}', (SELECT id FROM perfis WHERE nome = 'Cliente'))`);
 
-            // Categorias e empresa inseridas via jogos.csv no seed
             this._seedJogosFromCSV();
         });
     }
 
     _seedJogosFromCSV() {
-        const csvFilePath = path.join(__dirname, 'jogos.csv');
-        fs.readFile(csvFilePath, 'utf8', (err, data) => {
-            if (err) {
-                console.error('Erro ao ler o arquivo CSV:', err);
+        this.db.get('SELECT COUNT(*) as count FROM jogos', (countErr, row) => {
+            if (countErr) {
+                console.error('Erro ao verificar jogos cadastrados:', countErr);
                 return;
             }
 
-            this.db.serialize(() => {
-                this.db.run('DELETE FROM itens_carrinho');
-                this.db.run('DELETE FROM avaliacoes');
-                this.db.run('DELETE FROM lista_desejos');
-                this.db.run('DELETE FROM jogos');
-                this.db.run('DELETE FROM categorias');
-                this.db.run('DELETE FROM empresas');
+            if (row && row.count > 0) {
+                return;
+            }
 
-                const lines = data.split('\n').filter(line => line.trim());
-                lines.forEach(line => {
-                    const [nome, ano, preco, descricao, empresa, categoria] = line.split(',');
-                    if (nome) {
-                        this.db.run(`INSERT OR IGNORE INTO empresas (nome) VALUES (?)`, [empresa]);
-                        this.db.run(`INSERT OR IGNORE INTO categorias (nome) VALUES (?)`, [categoria]);
-                        this.db.run(`INSERT OR IGNORE INTO jogos (nome, ano, preco, descricao, fk_empresa, fk_categoria) VALUES 
-                            (?, ?, ?, ?, (SELECT id FROM empresas WHERE nome = ?), (SELECT id FROM categorias WHERE nome = ?))`, 
-                            [nome, parseInt(ano), parseFloat(preco), descricao, empresa, categoria]);
-                    }
+            const csvFilePath = path.join(__dirname, 'jogos.csv');
+            fs.readFile(csvFilePath, 'utf8', (err, data) => {
+                if (err) {
+                    console.error('Erro ao ler o arquivo CSV:', err);
+                    return;
+                }
+
+                this.db.serialize(() => {
+                    const lines = data.split('\n').filter(line => line.trim());
+                    lines.forEach(line => {
+                        const [nome, ano, preco, descricao, empresa, categoria] = line.split(',');
+                        if (nome) {
+                            this.db.run(`INSERT OR IGNORE INTO empresas (nome) VALUES (?)`, [empresa]);
+                            this.db.run(`INSERT OR IGNORE INTO categorias (nome) VALUES (?)`, [categoria]);
+                            this.db.run(`INSERT OR IGNORE INTO jogos (nome, ano, preco, descricao, fk_empresa, fk_categoria) VALUES
+                                (?, ?, ?, ?, (SELECT id FROM empresas WHERE nome = ?), (SELECT id FROM categorias WHERE nome = ?))`,
+                                [nome, parseInt(ano), parseFloat(preco), descricao, empresa, categoria]);
+                        }
+                    });
                 });
             });
         });
     }
 }
 
-// Exporta uma única instância do banco
 module.exports = new Database();
