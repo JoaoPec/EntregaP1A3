@@ -123,6 +123,14 @@ export async function getJogosMaisVendidos(top, empresaId) {
   return request(url)
 }
 
+export async function getResumoRelatorios() {
+  return request('/relatorios/resumo')
+}
+
+export async function getVendasPorCategoria() {
+  return request('/relatorios/categorias')
+}
+
 export async function getEmpresas() {
   return request('/empresas')
 }

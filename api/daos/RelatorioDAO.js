@@ -3,6 +3,15 @@ const Jogo = require("../models/Jogo");
 const JogoMaisVendidoDTO = require('../dtos/JogoMaisVendidoDTO');
 
 class RelatorioDAO {
+    async summary() {
+        const query = `
+            SELECT
+                COUNT(*) as total_compras,
+                COALESCE(SUM(valor_total), 0) as valor_total
+            FROM vendas`;
+        return await dbService.get(query);
+    }
+
     async countGameMostSell(top) {
         const query = `
             SELECT
@@ -39,6 +48,21 @@ class RelatorioDAO {
         const rows = await dbService.all(query, [empresaId, top]);
         if (rows == undefined) return [];
         return rows.map(row => new JogoMaisVendidoDTO(row.jogo, row.empresa, row.total_vendas));
+    }
+
+    async countSalesByCategory() {
+        const query = `
+            SELECT
+                cat.nome as categoria,
+                COUNT(ic.id) as total_vendas
+            FROM categorias cat
+            JOIN jogos j ON j.fk_categoria = cat.id
+            JOIN itens_carrinho ic ON ic.fk_jogo = j.id
+            JOIN carrinhos c ON c.id = ic.fk_carrinho
+            WHERE c.status = 'F'
+            GROUP BY cat.id, cat.nome
+            ORDER BY total_vendas DESC`;
+        return await dbService.all(query);
     }
 }
 

@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts'
-import { getJogosMaisVendidos, getHistorico, getCategorias, getJogos, getEmpresas } from '../services/api'
+import { getJogosMaisVendidos, getEmpresas, getResumoRelatorios, getVendasPorCategoria } from '../services/api'
 
 const CORES = ['#6b8499', '#849a7a', '#a08888', '#9188a0', '#a89470']
 
 function Relatorios() {
   const [topJogos, setTopJogos] = useState([])
   const [topPorEmpresa, setTopPorEmpresa] = useState([])
-  const [vendas, setVendas] = useState([])
+  const [resumo, setResumo] = useState({ totalCompras: 0, valorTotal: 0 })
   const [dadosPizza, setDadosPizza] = useState([])
   const [empresas, setEmpresas] = useState([])
   const [empresaFiltro, setEmpresaFiltro] = useState('')
@@ -19,32 +19,20 @@ function Relatorios() {
       setCarregando(true)
       setErro('')
       try {
-        const [maisVendidos, historico, categorias, jogos, listaEmpresas] = await Promise.all([
+        const [maisVendidos, resumoVendas, vendasPorCategoria, listaEmpresas] = await Promise.all([
           getJogosMaisVendidos(5),
-          getHistorico(),
-          getCategorias(),
-          getJogos(),
+          getResumoRelatorios(),
+          getVendasPorCategoria(),
           getEmpresas()
         ])
 
         setTopJogos(maisVendidos || [])
-        setVendas(historico || [])
+        setResumo(resumoVendas || { totalCompras: 0, valorTotal: 0 })
         setEmpresas(listaEmpresas || [])
-
-        if (jogos && categorias) {
-          const contagem = {}
-          categorias.forEach(function (cat) {
-            contagem[cat.id] = { nome: cat.nome, qtd: 0 }
-          })
-          jogos.forEach(function (jogo) {
-            const catId = jogo.fkCategoria || jogo.fk_categoria
-            if (contagem[catId]) contagem[catId].qtd += 1
-          })
-          setDadosPizza(Object.values(contagem).filter(c => c.qtd > 0).map(c => ({
-            name: c.nome,
-            value: c.qtd
-          })))
-        }
+        setDadosPizza((vendasPorCategoria || []).map(c => ({
+          name: c.categoria,
+          value: c.total_vendas
+        })))
       } catch (err) {
         setErro(err.message)
       }
@@ -69,8 +57,8 @@ function Relatorios() {
     carregarPorEmpresa()
   }, [empresaFiltro])
 
-  const totalCompras = vendas.length
-  const valorTotal = vendas.reduce((s, v) => s + Number(v.valor_total), 0)
+  const totalCompras = Number(resumo.totalCompras || 0)
+  const valorTotal = Number(resumo.valorTotal || 0)
 
   const dadosBarras = (topJogos || []).map(function (j) {
     return {
